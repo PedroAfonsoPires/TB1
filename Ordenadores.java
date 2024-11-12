@@ -3,6 +3,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Random;
 import java.util.Scanner;
+import java.util.Stack;
 
 public class Ordenadores {
 
@@ -210,11 +211,23 @@ public class Ordenadores {
     }
 
     // Quick Sort
-    public static <T extends Comparable<T>> void quicksort(T[] array, int lo, int hi) {
-        if (lo < hi) {
-            int pi = partition(array, lo, hi);
-            quicksort(array, lo, pi - 1);
-            quicksort(array, pi + 1, hi);
+    public static <T extends Comparable<T>> void quicksort(T[] array) {
+        Stack<int[]> stack = new Stack<>();
+        stack.push(new int[]{0, array.length - 1});
+
+        while (!stack.isEmpty()) {
+            int[] range = stack.pop();
+            int lo = range[0];
+            int hi = range[1];
+
+            if (lo < hi) {
+                // Particionar o vetor
+                int pi = partition(array, lo, hi);
+
+                // Empilhar os intervalos para ordenação
+                stack.push(new int[]{lo, pi - 1});
+                stack.push(new int[]{pi + 1, hi});
+            }
         }
     }
 
@@ -235,7 +248,7 @@ public class Ordenadores {
         return i + 1;
     }
 
-    // Método de medição de tempo
+    // Metodo de medição de tempo
     public static <T extends Comparable<T>> long medirTempo(T[] array, String metodo) {
         long inicio = System.nanoTime();
         switch (metodo) {
@@ -245,7 +258,7 @@ public class Ordenadores {
             case "shellsort": shellsort(array); break;
             case "heapsort": heapsort(array); break;
             case "mergesort": mergesort(array); break;
-            case "quicksort": quicksort(array, 0, array.length - 1); break;
+            case "quicksort": quicksort(array); break;
             case "radixsort": radixsort((Integer[]) array); break;
             case "countingsort": countingsort((Integer[]) array); break;
             case "bucketsort": bucketsort((Integer[]) array); break;
@@ -254,7 +267,7 @@ public class Ordenadores {
         return System.nanoTime() - inicio;
     }
 
-    // Método para criar arrays baseados nas opções do usuário
+    // Metodo para criar arrays baseados nas opções do usuário
     public static Integer[] criarArray(int n, String tipo) {
         Integer[] array = new Integer[n];
         switch (tipo.toLowerCase()) {
@@ -326,7 +339,7 @@ public class Ordenadores {
                 default: System.out.println("Opção inválida."); continue;
             }
 
-            int[] tamanhos = {100, 1000, 10000, 100000, 1000000};
+            int[] tamanhos = {100, 1000, 10000, 100000, 1000000 };
             for (int tamanho : tamanhos) {
                 Integer[] array = criarArray(tamanho, tipo);
                 Integer[] copia = Arrays.copyOf(array, array.length);
@@ -334,7 +347,6 @@ public class Ordenadores {
                 System.out.println(metodo + " com array " + tipo + " de tamanho " + tamanho + ": " + tempo + " ns");
             }
         }
-
         scanner.close();
     }
 }
