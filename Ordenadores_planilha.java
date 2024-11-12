@@ -252,7 +252,7 @@ public class Ordenadores_planilha {
     }
 
     // Método de medição de tempo
-    public static <T extends Comparable<T>> long medirTempo(T[] array, String metodo) {
+  public static <T extends Comparable<T>> long medirTempo(T[] array, String metodo) {
         long inicio = System.nanoTime();
         switch (metodo) {
             case "bubblesort": bubblesort(array); break;
@@ -261,7 +261,7 @@ public class Ordenadores_planilha {
             case "shellsort": shellsort(array); break;
             case "heapsort": heapsort(array); break;
             case "mergesort": mergesort(array); break;
-            case "quicksort": quicksort(array); break;
+            case "quicksort": quicksort(array, 0, array.length - 1); break;
             case "radixsort": radixsort((Integer[]) array); break;
             case "countingsort": countingsort((Integer[]) array); break;
             case "bucketsort": bucketsort((Integer[]) array); break;
@@ -270,7 +270,6 @@ public class Ordenadores_planilha {
         return System.nanoTime() - inicio;
     }
 
-    // Método para criar arrays baseados nas opções do usuário
     public static Integer[] criarArray(int n, String tipo) {
         Integer[] array = new Integer[n];
         switch (tipo.toLowerCase()) {
@@ -295,77 +294,71 @@ public class Ordenadores_planilha {
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-
         String[] metodos = {"bubblesort", "insertionsort", "selectionsort", "shellsort", "heapsort", "mergesort", "quicksort", "radixsort", "countingsort", "bucketsort"};
-        ArrayList<String> resultados = new ArrayList<>(); // Lista para armazenar resultados
 
-        while (true) {
-            System.out.println("\nEscolha o método de ordenação ou digite 'sair' para encerrar:");
-            for (int i = 0; i < metodos.length; i++) {
-                System.out.println((i + 1) + ". " + metodos[i]);
+        try (PrintWriter writer = new PrintWriter(new FileWriter("resultados.csv", true))) {
+            writer.println("Metodo,Tipo de Array,Tamanho,Tempo (ns)"); // Escreve o cabeçalho apenas na primeira execução
+
+            while (true) {
+                System.out.println("\nEscolha o método de ordenação ou digite 'sair' para encerrar:");
+                for (int i = 0; i < metodos.length; i++) {
+                    System.out.println((i + 1) + ". " + metodos[i]);
+                }
+
+                System.out.print("Escolha: ");
+                String metodoEscolha = scanner.next();
+
+                if (metodoEscolha.equalsIgnoreCase("sair")) break;
+
+                int metodoIndex;
+                try {
+                    metodoIndex = Integer.parseInt(metodoEscolha) - 1;
+                } catch (NumberFormatException e) {
+                    System.out.println("Opção inválida.");
+                    continue;
+                }
+
+                if (metodoIndex < 0 || metodoIndex >= metodos.length) {
+                    System.out.println("Opção inválida.");
+                    continue;
+                }
+
+                String metodo = metodos[metodoIndex];
+
+                System.out.println("\nEscolha o tipo de array:");
+                System.out.println("1. Crescente");
+                System.out.println("2. Decrescente");
+                System.out.println("3. Aleatório");
+                System.out.println("4. Repetidos");
+
+                System.out.print("Escolha: ");
+                String tipoEscolha = scanner.next();
+
+                String tipo;
+                switch (tipoEscolha) {
+                    case "1": tipo = "crescente"; break;
+                    case "2": tipo = "decrescente"; break;
+                    case "3": tipo = "aleatorio"; break;
+                    case "4": tipo = "repetidos"; break;
+                    default: System.out.println("Opção inválida."); continue;
+                }
+
+                int[] tamanhos = {100, 1000, 10000, 100000, 1000000};
+                for (int tamanho : tamanhos) {
+                    Integer[] array = criarArray(tamanho, tipo);
+                    Integer[] copia = Arrays.copyOf(array, array.length);
+                    long tempo = medirTempo(copia, metodo);
+
+                    // Escreve o resultado diretamente no arquivo CSV
+                    writer.printf("%s,%s,%d,%d%n", metodo, tipo, tamanho, tempo);
+                    writer.flush(); // Garante que cada linha é gravada imediatamente
+                    System.out.println(metodo + " com array " + tipo + " de tamanho " + tamanho + ": " + tempo + " ns");
+                }
             }
-
-            System.out.print("Escolha: ");
-            String metodoEscolha = scanner.next();
-
-            if (metodoEscolha.equalsIgnoreCase("sair")) break;
-
-            int metodoIndex;
-            try {
-                metodoIndex = Integer.parseInt(metodoEscolha) - 1;
-            } catch (NumberFormatException e) {
-                System.out.println("Opção inválida.");
-                continue;
-            }
-
-            if (metodoIndex < 0 || metodoIndex >= metodos.length) {
-                System.out.println("Opção inválida.");
-                continue;
-            }
-
-            String metodo = metodos[metodoIndex];
-
-            System.out.println("\nEscolha o tipo de array:");
-            System.out.println("1. Crescente");
-            System.out.println("2. Decrescente");
-            System.out.println("3. Aleatório");
-            System.out.println("4. Repetidos");
-
-            System.out.print("Escolha: ");
-            String tipoEscolha = scanner.next();
-
-            String tipo;
-            switch (tipoEscolha) {
-                case "1": tipo = "crescente"; break;
-                case "2": tipo = "decrescente"; break;
-                case "3": tipo = "aleatorio"; break;
-                case "4": tipo = "repetidos"; break;
-                default: System.out.println("Opção inválida."); continue;
-            }
-
-            int[] tamanhos = {100, 1000, 10000, 100000, 1000000};
-            for (int tamanho : tamanhos) {
-                Integer[] array = criarArray(tamanho, tipo);
-                Integer[] copia = Arrays.copyOf(array, array.length);
-                long tempo = medirTempo(copia, metodo);
-
-                // Adiciona o resultado no formato desejado
-                resultados.add(metodo + " - " + tipo + " - " + tamanho + " - " + tempo);
-                System.out.println(metodo + " com array " + tipo + " de tamanho " + tamanho + ": " + tempo + " ns");
-            }
-        }
-
-        // Salvar resultados em um arquivo CSV
-        try (PrintWriter writer = new PrintWriter(new FileWriter("resultados.csv"))) {
-            writer.println("Metodo,Tipo de Array,Tamanho,Tempo (ns)"); // Cabeçalho
-            for (String linha : resultados) {
-                writer.println(linha.replace(" - ", ",")); // Converte para CSV
-            }
-            System.out.println("Resultados salvos em 'resultados.csv'.");
         } catch (IOException e) {
             System.out.println("Erro ao escrever o arquivo CSV: " + e.getMessage());
+        } finally {
+            scanner.close();
         }
-
-        scanner.close();
     }
 }
