@@ -6,7 +6,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Random;
 import java.util.Scanner;
-import java.util.Stack;
 
 public class Ordenadores_planilha {
 
@@ -135,9 +134,13 @@ public class Ordenadores_planilha {
                     minIdx = j;
                 }
             }
-            T temp = array[minIdx];
-            array[minIdx] = array[i];
-            array[i] = temp;
+
+            // Evita troca desnecessária se o minIdx já for igual ao i
+            if (minIdx != i) {
+                T temp = array[minIdx];
+                array[minIdx] = array[i];
+                array[i] = temp;
+            }
         }
     }
 
@@ -215,150 +218,189 @@ public class Ordenadores_planilha {
 
     // Quick Sort
     public static <T extends Comparable<T>> void quicksort(T[] array) {
-        Stack<int[]> stack = new Stack<>();
-        stack.push(new int[]{0, array.length - 1});
+        quicksort(array, 0, array.length - 1);
+    }
 
-        while (!stack.isEmpty()) {
-            int[] range = stack.pop();
-            int lo = range[0];
-            int hi = range[1];
-
-            if (lo < hi) {
-                // Particionar o vetor
-                int pi = partition(array, lo, hi);
-
-                // Empilhar os intervalos para ordenação
-                stack.push(new int[]{lo, pi - 1});
-                stack.push(new int[]{pi + 1, hi});
-            }
+    private static <T extends Comparable<T>> void quicksort(T[] array, int low, int high) {
+        if (low < high) {
+            int pivotIndex = partitionMediana(array, low, high);
+            quicksort(array, low, pivotIndex - 1);
+            quicksort(array, pivotIndex + 1, high);
         }
     }
 
-    private static <T extends Comparable<T>> int partition(T[] array, int lo, int hi) {
-        T pivot = array[hi];
-        int i = lo - 1;
-        for (int j = lo; j < hi; j++) {
-            if (array[j].compareTo(pivot) <= 0) {
-                i++;
-                T temp = array[i];
-                array[i] = array[j];
-                array[j] = temp;
-            }
+    private static <T extends Comparable<T>> int partitionMediana(T[] array, int low, int high) {
+        int mid = low + (high - low) / 2;
+        if (array[low].compareTo(array[mid]) > 0) swap(array, low, mid);
+        if (array[low].compareTo(array[high]) > 0) swap(array, low, high);
+        if (array[mid].compareTo(array[high]) > 0) swap(array, mid, high);
+
+        swap(array, mid, high - 1);
+        T pivot = array[high - 1];
+
+        int i = low;
+        int j = high - 2; // Ajuste para começar uma posição antes do pivô
+
+        while (true) {
+            while (i < high - 1 && array[++i].compareTo(pivot) < 0); // Limite i para não ultrapassar high - 1
+            while (j > low && array[--j].compareTo(pivot) > 0);       // Limite j para não ultrapassar low
+            if (i >= j) break;
+            swap(array, i, j);
         }
-        T temp = array[i + 1];
-        array[i + 1] = array[hi];
-        array[hi] = temp;
-        return i + 1;
+
+        swap(array, i, high - 1);
+        return i;
     }
 
-    // Método de medição de tempo
-  public static <T extends Comparable<T>> long medirTempo(T[] array, String metodo) {
-        long inicio = System.nanoTime();
-        switch (metodo) {
-            case "bubblesort": bubblesort(array); break;
-            case "insertionsort": insertionsort(array); break;
-            case "selectionsort": selectionsort(array); break;
-            case "shellsort": shellsort(array); break;
-            case "heapsort": heapsort(array); break;
-            case "mergesort": mergesort(array); break;
-            case "quicksort": quicksort(array, 0, array.length - 1); break;
-            case "radixsort": radixsort((Integer[]) array); break;
-            case "countingsort": countingsort((Integer[]) array); break;
-            case "bucketsort": bucketsort((Integer[]) array); break;
-            default: throw new IllegalArgumentException("Método de ordenação inválido: " + metodo);
-        }
-        return System.nanoTime() - inicio;
+    private static <T> void swap(T[] array, int i, int j) {
+        T temp = array[i];
+        array[i] = array[j];
+        array[j] = temp;
     }
 
-    public static Integer[] criarArray(int n, String tipo) {
-        Integer[] array = new Integer[n];
-        switch (tipo.toLowerCase()) {
-            case "crescente":
-                for (int i = 0; i < n; i++) array[i] = i;
-                break;
-            case "decrescente":
-                for (int i = 0; i < n; i++) array[i] = n - i - 1;
-                break;
-            case "aleatorio":
-                Random random = new Random();
-                for (int i = 0; i < n; i++) array[i] = random.nextInt(1000);
-                break;
-            case "repetidos":
-                for (int i = 0; i < n; i++) array[i] = (i % 5);
-                break;
-            default:
-                throw new IllegalArgumentException("Tipo de array inválido: " + tipo);
+    // Métodos para gerar arrays
+    public static Integer[] gerarArrayCrescente(int tamanho) {
+        Integer[] array = new Integer[tamanho];
+        for (int i = 0; i < tamanho; i++) {
+            array[i] = i;
+        }
+        return array;
+    }
+
+    public static Integer[] gerarArrayDecrescente(int tamanho) {
+        Integer[] array = new Integer[tamanho];
+        for (int i = 0; i < tamanho; i++) {
+            array[i] = tamanho - i - 1;
+        }
+        return array;
+    }
+
+    public static Integer[] gerarArrayAleatorio(int tamanho) {
+        Integer[] array = new Integer[tamanho];
+        Random random = new Random();
+        for (int i = 0; i < tamanho; i++) {
+            array[i] = random.nextInt(tamanho);
+        }
+        return array;
+    }
+
+    public static Integer[] gerarArrayRepetidos(int tamanho) {
+        Integer[] array = new Integer[tamanho];
+        Random random = new Random();
+        int valorRepetido = random.nextInt(tamanho);
+        for (int i = 0; i < tamanho; i++) {
+            array[i] = valorRepetido;
         }
         return array;
     }
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        String[] metodos = {"bubblesort", "insertionsort", "selectionsort", "shellsort", "heapsort", "mergesort", "quicksort", "radixsort", "countingsort", "bucketsort"};
+        String[] metodos = {"Counting Sort", "Radix Sort", "Bucket Sort", "Bubble Sort", "Insertion Sort", "Selection Sort",
+                "Shell Sort", "Heap Sort", "Merge Sort", "Quick Sort"};
 
-        try (PrintWriter writer = new PrintWriter(new FileWriter("resultados.csv", true))) {
-            writer.println("Metodo,Tipo de Array,Tamanho,Tempo (ns)"); // Escreve o cabeçalho apenas na primeira execução
+        String[] tipos = {"Crescente", "Decrescente", "Aleatório", "Repetidos"};
+        int[] tamanhos = {100, 1000, 10000, 100000, 1000000};
+        Random random = new Random();
 
-            while (true) {
-                System.out.println("\nEscolha o método de ordenação ou digite 'sair' para encerrar:");
-                for (int i = 0; i < metodos.length; i++) {
-                    System.out.println((i + 1) + ". " + metodos[i]);
-                }
-
-                System.out.print("Escolha: ");
-                String metodoEscolha = scanner.next();
-
-                if (metodoEscolha.equalsIgnoreCase("sair")) break;
-
-                int metodoIndex;
-                try {
-                    metodoIndex = Integer.parseInt(metodoEscolha) - 1;
-                } catch (NumberFormatException e) {
-                    System.out.println("Opção inválida.");
-                    continue;
-                }
-
-                if (metodoIndex < 0 || metodoIndex >= metodos.length) {
-                    System.out.println("Opção inválida.");
-                    continue;
-                }
-
-                String metodo = metodos[metodoIndex];
-
-                System.out.println("\nEscolha o tipo de array:");
-                System.out.println("1. Crescente");
-                System.out.println("2. Decrescente");
-                System.out.println("3. Aleatório");
-                System.out.println("4. Repetidos");
-
-                System.out.print("Escolha: ");
-                String tipoEscolha = scanner.next();
-
-                String tipo;
-                switch (tipoEscolha) {
-                    case "1": tipo = "crescente"; break;
-                    case "2": tipo = "decrescente"; break;
-                    case "3": tipo = "aleatorio"; break;
-                    case "4": tipo = "repetidos"; break;
-                    default: System.out.println("Opção inválida."); continue;
-                }
-
-                int[] tamanhos = {100, 1000, 10000, 100000, 1000000};
-                for (int tamanho : tamanhos) {
-                    Integer[] array = criarArray(tamanho, tipo);
-                    Integer[] copia = Arrays.copyOf(array, array.length);
-                    long tempo = medirTempo(copia, metodo);
-
-                    // Escreve o resultado diretamente no arquivo CSV
-                    writer.printf("%s,%s,%d,%d%n", metodo, tipo, tamanho, tempo);
-                    writer.flush(); // Garante que cada linha é gravada imediatamente
-                    System.out.println(metodo + " com array " + tipo + " de tamanho " + tamanho + ": " + tempo + " ns");
-                }
+        while (true) {  // Loop para retornar ao menu após cada execução
+            System.out.println("Escolha o método de ordenação:");
+            System.out.println("0. Sair");  // Opção de saída
+            for (int i = 0; i < metodos.length; i++) {
+                System.out.printf("%d. %s%n", i + 1, metodos[i]);
             }
-        } catch (IOException e) {
-            System.out.println("Erro ao escrever o arquivo CSV: " + e.getMessage());
-        } finally {
-            scanner.close();
+            System.out.printf("Escolha uma opção: ");
+            int metodoEscolhido = scanner.nextInt();
+            System.out.println("\n");
+
+            if (metodoEscolhido == 0) {
+                System.out.println("Programa encerrado.");
+                break;  // Encerra o loop e finaliza o programa
+            }
+
+            System.out.println("Escolha o tipo de array:");
+            for (int i = 0; i < tipos.length; i++) {
+                System.out.printf("%d. %s%n", i + 1, tipos[i]);
+            }
+            System.out.printf("Escolha uma opção: ");
+            int tipoEscolhido = scanner.nextInt();
+            System.out.println("\n");
+
+            try (PrintWriter writer = new PrintWriter(new FileWriter("resultados.csv", true))) {
+                writer.println("Método,Tipo,Tamanho,Execução,Tempo(ns)");
+
+                for (int tamanho : tamanhos) {
+                    for (int execucao = 1; execucao <= 10; execucao++) {
+                        Integer[] array;
+                        switch (tipoEscolhido) {
+                            case 1: // Crescente
+                                array = gerarArrayCrescente(tamanho);
+                                break;
+                            case 2: // Decrescente
+                                array = gerarArrayDecrescente(tamanho);
+                                break;
+                            case 3: // Aleatório
+                                array = gerarArrayAleatorio(tamanho);
+                                break;
+                            case 4: // Repetidos
+                                array = gerarArrayRepetidos(tamanho);
+                                break;
+                            default:
+                                throw new IllegalArgumentException("Tipo de array inválido.");
+                        }
+
+                        long tempoInicio = System.nanoTime();
+                        switch (metodoEscolhido) {
+                            case 1:
+                                countingsort(array);
+                                break;
+                            case 2:
+                                radixsort(array);
+                                break;
+                            case 3:
+                                bucketsort(array);
+                                break;
+                            case 4:
+                                bubblesort(array);
+                                break;
+                            case 5:
+                                insertionsort(array);
+                                break;
+                            case 6:
+                                selectionsort(array);
+                                break;
+                            case 7:
+                                shellsort(array);
+                                break;
+                            case 8:
+                                heapsort(array);
+                                break;
+                            case 9:
+                                mergesort(array);
+                                break;
+                            case 10:
+                                quicksort(array);
+                                break;
+                            default:
+                                throw new IllegalArgumentException("Método de ordenação inválido.");
+                        }
+                        long tempoFim = System.nanoTime();
+                        long tempoExecucao = tempoFim - tempoInicio;
+
+                        String metodo = metodos[metodoEscolhido - 1];
+                        String tipo = tipos[tipoEscolhido - 1];
+
+                        // Escreve o resultado no arquivo CSV
+                        writer.printf("%s,%s,%d,%d,%d%n", metodo, tipo, tamanho, execucao, tempoExecucao);
+
+                        // Exibe o resultado no console
+                        System.out.printf("Método: %s, Tipo: %s, Tamanho: %d, Execução: %d, Tempo: %d ns%n", metodo, tipo, tamanho, execucao, tempoExecucao);
+                    }
+                }
+            } catch (IOException e) {
+                System.out.println("Erro ao escrever no arquivo: " + e.getMessage());
+            }
         }
+        scanner.close();  // Fecha o scanner no final do programa
     }
 }
