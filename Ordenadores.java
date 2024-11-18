@@ -8,7 +8,7 @@ import java.util.Random;
 import java.util.Scanner;
 
 public class Ordenadores {
-
+    private static Integer[] arrayAleatorioGlobal;
     // Counting Sort
     public static void countingsort(Integer[] array) {
         if (array.length == 0) return;
@@ -276,12 +276,14 @@ public class Ordenadores {
     }
 
     public static Integer[] gerarArrayAleatorio(int tamanho) {
-        Integer[] array = new Integer[tamanho];
-        Random random = new Random();
-        for (int i = 0; i < tamanho; i++) {
-            array[i] = random.nextInt(tamanho);
+        if (arrayAleatorioGlobal == null || arrayAleatorioGlobal.length != tamanho) {
+            arrayAleatorioGlobal = new Integer[tamanho];
+            Random random = new Random();
+            for (int i = 0; i < tamanho; i++) {
+                arrayAleatorioGlobal[i] = random.nextInt(tamanho);
+            }
         }
-        return array;
+        return arrayAleatorioGlobal.clone();
     }
 
     public static Integer[] gerarArrayRepetidos(int tamanho) {
@@ -293,7 +295,6 @@ public class Ordenadores {
         }
         return array;
     }
-
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         String[] metodos = {"Counting Sort", "Radix Sort", "Bucket Sort", "Bubble Sort", "Insertion Sort", "Selection Sort",
@@ -301,11 +302,10 @@ public class Ordenadores {
 
         String[] tipos = {"Crescente", "Decrescente", "Aleatório", "Repetidos"};
         int[] tamanhos = {100, 1000, 10000, 100000, 1000000};
-        Random random = new Random();
 
-        while (true) {  // Loop para retornar ao menu após cada execução
+        while (true) {
             System.out.println("Escolha o método de ordenação:");
-            System.out.println("0. Sair");  // Opção de saída
+            System.out.println("0. Sair");
             for (int i = 0; i < metodos.length; i++) {
                 System.out.printf("%d. %s%n", i + 1, metodos[i]);
             }
@@ -315,7 +315,7 @@ public class Ordenadores {
 
             if (metodoEscolhido == 0) {
                 System.out.println("Programa encerrado.");
-                break;  // Encerra o loop e finaliza o programa
+                break;
             }
 
             System.out.println("Escolha o tipo de array:");
@@ -390,10 +390,7 @@ public class Ordenadores {
                         String metodo = metodos[metodoEscolhido - 1];
                         String tipo = tipos[tipoEscolhido - 1];
 
-                        // Escreve o resultado no arquivo CSV
                         writer.printf("%s,%s,%d,%d,%d%n", metodo, tipo, tamanho, execucao, tempoExecucao);
-
-                        // Exibe o resultado no console
                         System.out.printf("Método: %s, Tipo: %s, Tamanho: %d, Execução: %d, Tempo: %d ns%n", metodo, tipo, tamanho, execucao, tempoExecucao);
                     }
                 }
@@ -401,6 +398,6 @@ public class Ordenadores {
                 System.out.println("Erro ao escrever no arquivo: " + e.getMessage());
             }
         }
-        scanner.close();  // Fecha o scanner no final do programa
+        scanner.close();
     }
 }
